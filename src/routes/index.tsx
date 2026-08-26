@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { calcolaNetto, formatEuro, type Breakdown } from "@/lib/salary";
+import {
+  calcolaNetto,
+  formatEuro,
+  SCAGLIONI_IRPEF,
+  type Breakdown,
+} from "@/lib/salary";
 
 export const Route = createFileRoute("/")({
   component: Index,
