@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { calcolaNetto, formatEuro, type Breakdown } from "@/lib/salary";
+import {
+  calcolaNetto,
+  formatEuro,
+  SCAGLIONI_IRPEF,
+  type Breakdown,
+} from "@/lib/salary";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -263,27 +268,40 @@ function Index() {
                   </span>
                 </div>
                 {row.expandable && showScaglioni && (
-                  <ul className="mb-2 ml-4 space-y-1 border-l border-slate-100 pl-4">
-                    {(
-                      breakdown?.scaglioni ?? [
-                        { id: "s1", label: "Scaglione 1 (fino a 28.000 €)" },
-                        { id: "s2", label: "Scaglione 2 (28.000 – 50.000 €)" },
-                        { id: "s3", label: "Scaglione 3 (oltre 50.000 €)" },
-                      ]
-                    ).map((s) => (
-                      <li
-                        key={s.id}
-                        className="flex justify-between text-xs text-slate-400"
-                      >
-                        <span>{s.label}</span>
-                        <span>
-                          {breakdown && "imposta" in s
-                            ? formatEuro(s.imposta)
-                            : PLACEHOLDER}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="mb-2 ml-4 border-l border-slate-100 pl-4">
+                    <p className="mb-2 text-xs leading-relaxed text-slate-400">
+                      Gli scaglioni si applicano all'imponibile fiscale (RAL −
+                      contributi), non alla RAL.
+                    </p>
+                    <ul className="space-y-1">
+                      {SCAGLIONI_IRPEF.map((s, i) => {
+                        const calc = breakdown?.scaglioni[i];
+                        return (
+                          <li
+                            key={s.id}
+                            className="flex justify-between gap-3 text-xs text-slate-400"
+                          >
+                            <span>
+                              {s.label}
+                              {calc && (
+                                <span className="text-slate-400">
+                                  {" · "}
+                                  {formatEuro(calc.imponibile)} ×{" "}
+                                  {(s.aliquota * 100)
+                                    .toFixed(0)
+                                    .replace(".", ",")}
+                                  %
+                                </span>
+                              )}
+                            </span>
+                            <span className="whitespace-nowrap">
+                              {calc ? formatEuro(calc.imposta) : PLACEHOLDER}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 )}
               </li>
             ))}
