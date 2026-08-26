@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { calcolaNetto, formatEuro, type Breakdown } from "@/lib/salary";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -14,24 +15,105 @@ const ASSUMPTIONS = [
   { label: "Agevolazioni", value: "Nessuna" },
 ];
 
-// Righe del dettaglio. In questa fase i valori sono placeholder:
-// le formule fiscali saranno collegate in una fase successiva.
-const DETAIL_ROWS = [
-  { id: "ral", label: "RAL (Retribuzione Annua Lorda)", strong: true },
-  { id: "inps", label: "Contributi INPS a carico dipendente" },
-  { id: "imponibile", label: "Imponibile IRPEF" },
-  { id: "irpef", label: "IRPEF (a scaglioni)", expandable: true },
-  { id: "regionale", label: "Addizionale regionale (Lazio)" },
-  { id: "comunale", label: "Addizionale comunale (Roma)" },
-  { id: "nettoAnnuo", label: "Netto annuo", strong: true },
-  { id: "nettoMensile", label: "Netto mensile (×13)", strong: true },
+type RowKind = "value" | "deduction" | "credit";
+
+interface DetailRow {
+  id: string;
+  label: string;
+  kind: RowKind;
+  strong?: boolean;
+  expandable?: boolean;
+  amount: (b: Breakdown) => number;
+}
+
+const DETAIL_ROWS: DetailRow[] = [
+  {
+    id: "ral",
+    label: "RAL (Retribuzione Annua Lorda)",
+    kind: "value",
+    strong: true,
+    amount: (b) => b.ral,
+  },
+  {
+    id: "inps",
+    label: "Contributi INPS a carico dipendente (9,19%)",
+    kind: "deduction",
+    amount: (b) => b.contributiInps,
+  },
+  {
+    id: "imponibile",
+    label: "Imponibile IRPEF",
+    kind: "value",
+    amount: (b) => b.imponibileFiscale,
+  },
+  {
+    id: "irpefLorda",
+    label: "IRPEF lorda (a scaglioni)",
+    kind: "deduction",
+    expandable: true,
+    amount: (b) => b.irpefLorda,
+  },
+  {
+    id: "detrazione",
+    label: "Detrazione lavoro dipendente",
+    kind: "credit",
+    amount: (b) => b.detrazioneLavoroDipendente,
+  },
+  {
+    id: "irpefNetta",
+    label: "IRPEF netta",
+    kind: "deduction",
+    amount: (b) => b.irpefNetta,
+  },
+  {
+    id: "regionale",
+    label: "Addizionale regionale (Lazio)",
+    kind: "deduction",
+    amount: (b) => b.addizionaleRegionale,
+  },
+  {
+    id: "comunale",
+    label: "Addizionale comunale (Roma)",
+    kind: "deduction",
+    amount: (b) => b.addizionaleComunale,
+  },
+  {
+    id: "nettoAnnuo",
+    label: "Netto annuo",
+    kind: "value",
+    strong: true,
+    amount: (b) => b.nettoAnnuo,
+  },
+  {
+    id: "nettoMensile",
+    label: "Netto mensile (×13)",
+    kind: "value",
+    strong: true,
+    amount: (b) => b.nettoMensile,
+  },
 ];
+
+function formatRow(row: DetailRow, breakdown: Breakdown): string {
+  const value = row.amount(breakdown);
+  if (row.kind === "deduction") return `− ${formatEuro(value)}`;
+  if (row.kind === "credit") return `+ ${formatEuro(value)}`;
+  return formatEuro(value);
+}
 
 function Index() {
   const [ral, setRal] = useState<string>("");
   const [showScaglioni, setShowScaglioni] = useState(false);
+  const [touched, setTouched] = useState(false);
 
-  const hasRal = ral.trim() !== "";
+  const parsedRal = useMemo(() => {
+    const n = Number(ral.replace(",", "."));
+    return ral.trim() !== "" && Number.isFinite(n) && n > 0 ? n : null;
+  }, [ral]);
+
+  const breakdown = useMemo(
+    () => (parsedRal !== null ? calcolaNetto(parsedRal) : null),
+    [parsedRal],
+  );
 
   return (
     <div className="min-h-screen bg-[#f8fafc] px-4 py-10 sm:py-16">
@@ -56,7 +138,7 @@ function Index() {
             className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400"
             style={{ fontFamily: '"Outfit", sans-serif' }}
           >
-            Casi d'uso supportato
+            Caso d'uso supportato
           </h2>
           <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
             {ASSUMPTIONS.map((a) => (
@@ -97,11 +179,17 @@ function Index() {
             </div>
             <button
               type="button"
+              onClick={() => setTouched(true)}
               className="h-12 rounded-lg bg-[#2563eb] px-6 text-sm font-semibold text-white transition hover:bg-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
             >
               Calcola
             </button>
           </div>
+          {touched && parsedRal === null && (
+            <p className="mt-2 text-xs text-red-500">
+              Inserisci un importo valido maggiore di zero.
+            </p>
+          )}
         </section>
 
         {/* Riepilogo in evidenza */}
@@ -111,7 +199,7 @@ function Index() {
               Netto annuo
             </p>
             <p className="mt-2 text-3xl font-bold text-[#0f172a]">
-              {PLACEHOLDER}
+              {breakdown ? formatEuro(breakdown.nettoAnnuo) : PLACEHOLDER}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -119,7 +207,7 @@ function Index() {
               Netto mensile (×13)
             </p>
             <p className="mt-2 text-3xl font-bold text-[#2563eb]">
-              {PLACEHOLDER}
+              {breakdown ? formatEuro(breakdown.nettoMensile) : PLACEHOLDER}
             </p>
           </div>
         </section>
@@ -166,46 +254,56 @@ function Index() {
                     className={
                       row.strong
                         ? "text-sm font-bold text-[#0f172a]"
-                        : "text-sm text-slate-500"
+                        : row.kind === "credit"
+                          ? "text-sm text-emerald-600"
+                          : "text-sm text-slate-500"
                     }
                   >
-                    {PLACEHOLDER}
+                    {breakdown ? formatRow(row, breakdown) : PLACEHOLDER}
                   </span>
                 </div>
                 {row.expandable && showScaglioni && (
                   <ul className="mb-2 ml-4 space-y-1 border-l border-slate-100 pl-4">
-                    <li className="flex justify-between text-xs text-slate-400">
-                      <span>Scaglione 1 (fino a 28.000 €)</span>
-                      <span>{PLACEHOLDER}</span>
-                    </li>
-                    <li className="flex justify-between text-xs text-slate-400">
-                      <span>Scaglione 2 (28.000 – 50.000 €)</span>
-                      <span>{PLACEHOLDER}</span>
-                    </li>
-                    <li className="flex justify-between text-xs text-slate-400">
-                      <span>Scaglione 3 (oltre 50.000 €)</span>
-                      <span>{PLACEHOLDER}</span>
-                    </li>
+                    {(
+                      breakdown?.scaglioni ?? [
+                        { id: "s1", label: "Scaglione 1 (fino a 28.000 €)" },
+                        { id: "s2", label: "Scaglione 2 (28.000 – 50.000 €)" },
+                        { id: "s3", label: "Scaglione 3 (oltre 50.000 €)" },
+                      ]
+                    ).map((s) => (
+                      <li
+                        key={s.id}
+                        className="flex justify-between text-xs text-slate-400"
+                      >
+                        <span>{s.label}</span>
+                        <span>
+                          {breakdown && "imposta" in s
+                            ? formatEuro(s.imposta)
+                            : PLACEHOLDER}
+                        </span>
+                      </li>
+                    ))}
                   </ul>
                 )}
               </li>
             ))}
           </ul>
 
-          {!hasRal ? (
+          {!breakdown ? (
             <p className="mt-4 text-center text-xs text-slate-400">
               Inserisci una RAL per iniziare.
             </p>
           ) : (
-            <p className="mt-4 text-center text-xs text-slate-400">
-              Calcolo non ancora disponibile — le formule fiscali saranno
-              implementate in una fase successiva.
+            <p className="mt-4 text-center text-xs leading-relaxed text-slate-400">
+              Stima indicativa. Scaglioni IRPEF 2026 (23% / 33% / 43%),
+              contributi INPS 9,19%, addizionale regionale Lazio (L.R. 20/2025),
+              addizionale comunale Roma 0,9% su dati 2025.
             </p>
           )}
         </section>
 
         <footer className="mt-6 text-center text-xs text-slate-400">
-          Prototipo dimostrativo · I valori mostrati sono placeholder.
+          Prototipo dimostrativo · Non sostituisce una consulenza fiscale.
         </footer>
       </div>
     </div>
