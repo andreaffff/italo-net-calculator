@@ -109,6 +109,7 @@ function Index() {
   const [ral, setRal] = useState<string>("");
   const [showScaglioni, setShowScaglioni] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [submittedRal, setSubmittedRal] = useState<number | null>(null);
 
   const parsedRal = useMemo(() => {
     const n = Number(ral.replace(",", "."));
@@ -116,9 +117,16 @@ function Index() {
   }, [ral]);
 
   const breakdown = useMemo(
-    () => (parsedRal !== null ? calcolaNetto(parsedRal) : null),
-    [parsedRal],
+    () => (submittedRal !== null ? calcolaNetto(submittedRal) : null),
+    [submittedRal],
   );
+
+  const handleCalcola = () => {
+    setTouched(true);
+    if (parsedRal !== null) {
+      setSubmittedRal(parsedRal);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8fafc] px-4 py-10 sm:py-16">
