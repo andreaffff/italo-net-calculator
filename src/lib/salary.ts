@@ -11,7 +11,7 @@ export const SCAGLIONI_IRPEF = [
 ] as const;
 
 export const ADD_REGIONALE_LAZIO = {
-  soglia: 28000,
+  soglia: 15000,
   aliquotaBassa: 0.0173,
   aliquotaAlta: 0.0333,
   detrazione: 60,
@@ -83,8 +83,11 @@ export function calcolaAddizionaleRegionale(imponibile: number): number {
   const { soglia, aliquotaBassa, aliquotaAlta, detrazione, detrazioneDa, detrazioneA } =
     ADD_REGIONALE_LAZIO;
 
-  const aliquota = imponibile <= soglia ? aliquotaBassa : aliquotaAlta;
-  let importo = imponibile * aliquota;
+  // Progressiva: 1,73% fino a 15.000 €, 3,33% solo sulla parte eccedente.
+  let importo =
+    imponibile <= soglia
+      ? imponibile * aliquotaBassa
+      : soglia * aliquotaBassa + (imponibile - soglia) * aliquotaAlta;
 
   if (imponibile > detrazioneDa && imponibile <= detrazioneA) {
     importo -= detrazione;
