@@ -36,7 +36,7 @@ DETRAZIONE LAVORO DIPENDENTE: https://www.agenziaentrate.gov.it/portale/document
 RAL → contributi a carico del dipendente
 
 Formula:
-RAL × 9,19
+RAL × 0,0919
 
 Fonte:
 INPS
@@ -101,7 +101,8 @@ Agenzia delle Entrate / normativa IRPEF 2026
 
 ## 4. Detrazione lavoro dipendente
 
-IRPEF lorda → IRPEF dopo detrazione
+Reddito complessivo → detrazione
+IRPEF lorda - detrazione → IRPEF netta
 
 La detrazione viene calcolata in funzione del reddito complessivo.
 
@@ -134,20 +135,33 @@ Art. 13 TUIR / disciplina delle detrazioni da lavoro dipendente
 
 Imponibile fiscale → Addizionale regionale Lazio
 
-Per il 2026:
+Per l'anno d'imposta 2026:
 
-Reddito ≤ 28.000 €:
-    aliquota = 1,73%
+- fino a 15.000 € → 1,73%
+- oltre 15.000 € → 3,33%
 
-Reddito > 28.000 €:
-    aliquota = 3,33%
+L'addizionale viene calcolata progressivamente:
+l'aliquota del 3,33% viene applicata esclusivamente alla
+parte di reddito superiore a 15.000 €.
 
-Per redditi compresi tra 28.001 € e 30.000 €:
-    viene applicata una detrazione di 60 €.
+Formula:
+
+Se reddito <= 15.000:
+    addizionale = reddito × 1,73%
+
+Se reddito > 15.000:
+    addizionale =
+        15.000 × 1,73%
+        +
+        (reddito - 15.000) × 3,33%
+
+Per redditi imponibili compresi tra 28.001 € e 30.000 € è
+prevista una detrazione di 60 €.
 
 Fonte:
-Legge Regionale Lazio n. 20 del 31 dicembre 2025,
-art. 2.
+Regione Lazio — Misura dell'aliquota dell'addizionale regionale
+all'IRPEF — Anno d'imposta 2026.
+Legge Regionale Lazio n. 20 del 31 dicembre 2025, art. 2.
 
 
 ## 6. Addizionale comunale
