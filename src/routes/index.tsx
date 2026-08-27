@@ -186,13 +186,19 @@ function Index() {
                 step={100}
                 value={ral}
                 onChange={(e) => setRal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleCalcola();
+                  }
+                }}
                 placeholder="30.000"
                 className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-4 text-lg text-[#0f172a] outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
               />
             </div>
             <button
               type="button"
-              onClick={() => setTouched(true)}
+              onClick={handleCalcola}
               className="h-12 rounded-lg bg-[#2563eb] px-6 text-sm font-semibold text-white transition hover:bg-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
             >
               Calcola
