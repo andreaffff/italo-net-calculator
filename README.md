@@ -1,21 +1,22 @@
-##PROTITIPO CALCOLATORE RETRIBUZIONE NETTA##
+#PROTITIPO CALCOLATORE RETRIBUZIONE NETTA
 
-il prototipo stima la retribuzione netta di un dipendente privato a tempo indeterminato(in questo caso sono previste 13 mensilità),
-residente a Roma con detrazione da lavoro dipendete, senza detrazioni particolari o agevolazioni particolari.
+## ASSUNZIONI
 
+Il prototipo considera il seguente caso standard:
 
-##IMPORTATE##
-NON TENGO IN CONSIDERAZIONE:
--BONUS
--FIGLI/CONIUGE A CARICO
--WALFARE
--PREMI
--LAVORO STRAORDINARIO
--FRINGE BENEFIT.
+- dipendente del settore privato;
+- contratto a tempo indeterminato;
+- 13 mensilità;
+- residente fiscalmente a Roma;
+- rapporto di lavoro attivo per l'intero anno;
+- nessun altro reddito;
+- nessuna detrazione particolare;
+- nessuna agevolazione particolare;
+- nessun familiare a carico.
 
 
 -Quindi partendo dalla RAL tolgo i contributi -> importo a cui dovranno essere sottratte le imposte.
--A questo punto calcolo le imposto-> IRPEF + addizionali comunali e regionali
+-A questo punto calcolo le imposte -> IRPEF + addizionali comunali e regionali
 -calcolo delle detrazioni
 -calcolo imposta effettiva da pagare
 -calcolo del netto annuale
@@ -44,9 +45,15 @@ INPS
 
 ## 2. Imponibile fiscale
 
-Contributi → imponibile fiscale
+RAL → imponibile fiscale
+
+Nel caso semplificato considerato, l'imponibile fiscale viene
+stimato sottraendo dalla RAL i contributi previdenziali a carico
+del dipendente.
 
 Formula:
+
+Imponibile fiscale =
 RAL - contributi previdenziali
 
 Fonte:
@@ -204,3 +211,49 @@ Formula:
 Netto mensile =
 Netto annuale / 13
 
+# VALIDAZIONE
+
+Il modello è stato verificato utilizzando diversi valori di RAL,
+inclusi valori prossimi ai limiti degli scaglioni IRPEF.
+
+Per ogni caso vengono verificati separatamente:
+- contributi previdenziali
+- imponibile fiscale
+- IRPEF lorda
+- detrazione
+- IRPEF netta
+- addizionale regionale
+- addizionale comunale
+- netto annuale
+- netto mensile
+
+
+# UTILIZZO DELL'AI
+
+Lovable è stato utilizzato come strumento di prototipazione
+e sviluppo.
+
+Il modello di calcolo è stato definito separatamente sulla base
+delle fonti indicate e successivamente implementato nel prototipo.
+
+L'output generato dall'AI è stato verificato rispetto al modello
+di calcolo e ai casi di test definiti.
+
+# LIMITAZIONI
+
+Il prototipo non rappresenta un calcolatore paghe completo.
+
+Il risultato è una stima basata sulle assunzioni definite e sulle
+semplificazioni adottate.
+
+In particolare, non vengono gestiti:
+- variazioni della situazione lavorativa durante l'anno;
+- periodi di lavoro inferiori all'anno;
+- altri redditi;
+- particolari regimi contributivi;
+- bonus e premi;
+- welfare e fringe benefit;
+- familiari a carico;
+- lavoro straordinario;
+- ulteriori detrazioni o deduzioni;
+- casistiche fiscali particolari.
