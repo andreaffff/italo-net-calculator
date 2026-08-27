@@ -11,7 +11,7 @@ export const SCAGLIONI_IRPEF = [
 ] as const;
 
 export const ADD_REGIONALE_LAZIO = {
-  soglia: 28000,
+  soglia: 15000,
   aliquotaBassa: 0.0173,
   aliquotaAlta: 0.0333,
   detrazione: 60,
