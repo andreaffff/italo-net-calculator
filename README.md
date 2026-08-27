@@ -161,7 +161,6 @@ prevista una detrazione di 60 €.
 Fonte:
 Regione Lazio — Misura dell'aliquota dell'addizionale regionale
 all'IRPEF — Anno d'imposta 2026.
-Legge Regionale Lazio n. 20 del 31 dicembre 2025, art. 2.
 
 
 ## 6. Addizionale comunale
